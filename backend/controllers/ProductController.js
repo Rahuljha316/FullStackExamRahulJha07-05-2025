@@ -1,5 +1,5 @@
 const Product = require("../models/mongo/Product");
-
+const mongoose = require('mongoose')
 
 const addProduct = async (req, res) => {
     try {
@@ -48,7 +48,27 @@ const getProduct = async (req, res) => {
     }
 }
 
+const updateProduct = async (req, res) => {
+    try {
+        const { title, description, price } = req.body;
+        const id = req.params.id;
+        // console.log(id)
+        // console.log(title, description, price)
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid Id " })
+        }
+        const product = await Product.findByIdAndUpdate(id, { title, description, price }, { new: true })
+        if (!product) {
+            return res.status(404).json({ message: 'Product Not Found' })
+        }
+        res.json(product)
+    } catch (error) {
+        console.error("Error", error)
+        res.status(500).json({ message: 'Server Error' })
+    }
+}
 module.exports = {
     addProduct,
-    getProduct
+    getProduct,
+    updateProduct
 }
