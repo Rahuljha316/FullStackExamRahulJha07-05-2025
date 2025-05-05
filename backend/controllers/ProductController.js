@@ -25,6 +25,30 @@ const addProduct = async (req, res) => {
 
 }
 
+const getProduct = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, search = "" } = req.query;
+        const query = {};
+
+        if (search) {
+            query.title = { $regex: search, $options: 'i' }
+        }
+        const products = await Product.find(query).skip((page - 1) * limit).limit(parseInt(limit))
+
+        const total = await Product.countDocuments(query)
+        res.json({
+            data: products,
+            total: total,
+            page: parseInt(page),
+            totalPages: Math.ceil(total / limit)
+        })
+    } catch (error) {
+        console.error("Error", error)
+        res.status(500).json({ message: 'Server Error' })
+    }
+}
+
 module.exports = {
-    addProduct
+    addProduct,
+    getProduct
 }
