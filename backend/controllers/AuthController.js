@@ -1,14 +1,51 @@
 const User = require("../models/sql/User");
 const bcrypt = require('bcrypt')
 const validator = require('validator')
+const jwt = require('jsonwebtoken')
+const JWT_SECRET = process.env.JWT_SECRET;
 
-const login = () => {
+
+const login = async (req, res) => {
+    try {
+
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({
+                message: 'Email and Password are required'
+            })
+        }
+
+        const user = await User.findOne({ where: { email: email } })
+        
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid email or password"
+            })
+        }
+
+        const matchPassword = await bcrypt.compare(password, user.password)
+        if (!matchPassword) {
+            return res.status(400).json({
+                message: "Invalid Email or password "
+            })
+        }
+        const token = jwt.sign(
+            { userId: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: "2d" }
+        )
+        return res.status(200).json({ token: token, message: "Login Successful" })
+
+    } catch (error) {
+        console.error("Error", error)
+        return res.status(500).json({ message: "Server Error" })
+    }
 
 };
 
 const register = async (req, res) => {
     try {
-        // console.log(req.body)
+
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({
