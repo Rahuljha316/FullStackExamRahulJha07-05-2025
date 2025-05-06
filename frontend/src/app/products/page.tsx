@@ -19,7 +19,7 @@ export default function Products( ){
     const [page,setPage] = useState<number>(1)
     const [total,setTotal] = useState<number>(0)
     const [search, setSearch]= useState<string>("");
-    const [limit, setLimit] =useState<number>(5)
+    const [limit, setLimit] =useState<number>(5);
 
     const fetchProducts = async () =>{
         try{
